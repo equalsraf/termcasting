@@ -1,0 +1,23 @@
+#!/bin/sh
+# Usage: termcast [tcpport]
+set -eu
+
+PORT=${1:-9999}
+
+# first we force a size of 35 rows by 120 cols, this is the larger size
+# accepted by playterm.org
+stty rows 35 cols 120
+
+# the session will be saved in this file
+SESSION=$(mktemp termcast-XXXXXX.ttyrec)
+echo "Storing session in $SESSION"
+
+ttyplay -p $SESSION | openbsd-nc -l -p $PORT -k >/dev/null &
+SERVERPID=$!
+echo "Server started on port $PORT (pid: $SERVERPID)"
+
+trap "kill $SERVERPID" EXIT
+
+ttyrec $SESSION
+echo "Session recording finished: $SESSION"
+kill $SERVERPID

@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+# Disable echo while printing to the terminal
+stty_orig=`stty -g`
+stty -echo
+nc $1 $2
+stty $stty_orig
+
